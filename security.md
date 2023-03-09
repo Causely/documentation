@@ -20,7 +20,7 @@ Agents are deployed as a Kubernetes Daemonset across all nodes in the cluster to
 - The container uses root as user
 - It mounts the host filesystem into the container, granting access to the host directly
 
-This is required as the Causely agent leverages eBPF technology, which necessitates privileged access. Additional Kubernetes API permissions are required to collect specific metrics about the node and containers.
+This is required as the Causely agent leverages [eBPF](https://ebpf.io) technology, which necessitates privileged access. Additional Kubernetes API permissions are required to collect specific metrics about the node and containers.
 
 ``` yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,25 +51,11 @@ rules:
     verbs: ["get", "watch", "list"]
 ```
 
-and
-
-TODO: remove again
-
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-rules:
-  - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets", "daemonsets"]
-    verbs: ["update"]
-  - apiGroups: [""]
-    resources: ["pods/log"]
-    verbs: ["get"]
-```
-
 ### Executor
 
-The Executor is responsible for executing remediation actions within the cluster, and the Kubernetes ServiceAccount assigns the `cluster-admin` role to it.
+The Executor is responsible for executing remediation actions within the cluster, and its Kubernetes ServiceAccount is granted the `cluster-admin` role.
+
+The Executor is an optional component and can be disabled as part of the deployment process.
 
 ### Victoria Metrics
 
