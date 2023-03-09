@@ -10,13 +10,13 @@ Causely does not store or process any sensitive data or personally identifiable 
 
 ## Mediation
 
-The mediation comprises four components installed into a customer's Kubernetes cluster. None of these components access any sensitive information such as Kubernetes secrets. As a default, all components operate with minimal privileges, including non-root user status, absence of privilege (securityContext.privileged=false), no hostPath mounts, and no access to the Kubernetes API, unless stated otherwise in subsequent sections.
+The mediation comprises four components installed into a customer's Kubernetes cluster. None of these components access any sensitive information such as Kubernetes secrets. As a default, all components operate with minimal privileges, including non-root user status, absence of privilege (`securityContext.privileged=false`), no hostPath mounts, and no access to the Kubernetes API, unless stated otherwise in subsequent sections.
 
 ### Agents
 
 Agents are deployed as a Kubernetes Daemonset across all nodes in the cluster to gather node and container level metrics. This necessitates several permissions:
 
-- The container runs as privileged (securityContext.privileged=true)
+- The container runs as privileged (`securityContext.privileged=true`)
 - The container uses root as user
 - It mounts the host filesystem into the container, granting access to the host directly
 
