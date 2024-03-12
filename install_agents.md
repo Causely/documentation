@@ -40,6 +40,42 @@ causely agent install --values ./causely-values.yaml
 
 Please refer to the example [causely-values.yaml](./causely-values.yaml) for all available configuration options.
 
+## Prerequisites for Deploying on Openshift
+If you are deploying on Openshift, you need to use the group id from the uid-range assigned to the project:
+````bash
+oc get ns causely -o yaml|grep uid-range
+    openshift.io/sa.scc.uid-range: 1000630000/10000
+````
+````
+global:
+  securityContext:
+    fsGroup: 1000630000
+````
+
+Or you can change the security context of the project to the 'anyuid' SCC
+````bash
+oc adm policy add-scc-to-group anyuid system:serviceaccounts:causely
+````
+
+In both cases, you need to assign the 'privileged' SCC to the 'causely-agent' service account used by the Causely agents:
+````bash
+oc adm policy add-scc-to-user privileged -z causely-agent -n causely
+````
+
+## Using a custom StorageClass instead of the default one
+
+If you are deploying into a cluster, where there is no default StorageClass defined, you can
+specify the StorageClass to use for persistent volumes:
+````
+global:
+  storageClass: ocs-storagecluster-ceph-rbd
+````
+Alternatively you can annotate a default StorageClass:
+
+````
+kubectl patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+````
+
 ## Configure Datasources
 
 To ensure that Causely can detect a wide range of defects in your environment, it is recommended that you configure additional data sources if they are available.
@@ -59,12 +95,12 @@ Causely will automatically pick up metrics from supported exporters.
 
 Supported Exporters:
 
-- [Kafka](hhttps://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-kafka-exporter)
+- [Kafka](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-kafka-exporter)
 - [MongoDB](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-mongodb-exporter)
 - [MySQL](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-mysql-exporter)
 - [Postgresql](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-postgres-exporter)
 - [RabbitMQ](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-rabbitmq-exporter)
-- [Redis](hhttps://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-redis-exporter)
+- [Redis](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-redis-exporter)
 
 ### OpenTelemetry Traces
 
