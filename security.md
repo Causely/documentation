@@ -27,13 +27,19 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 rules:
   - apiGroups: [""]
-    resources: ["services","nodes", "nodes/metrics"]
+    resources: ["namespaces", "nodes", "nodes/metrics", "nodes/stats", "persistentvolumes", "persistentvolumeclaims", "pods", "services"]
     verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
   - nonResourceURLs:
       - /metrics
       - /metrics/cadvisor
     verbs:
       - get
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices"]
+    verbs: ["list"]
 ```
 
 Agents do not establish any outbound connections to the internet or any other service apart from the Mediator and Victoria Metrics. The agents periodically forward the topology and manifestation data to the Mediator, which, in turn, sends it to the Causely SaaS backend for analysis.
@@ -46,9 +52,15 @@ The Mediator is installed as a Kubernetes Deployment and is responsible for coll
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 rules:
-  - apiGroups: ["", "apps", "app.k8s.io", "batch"]
-    resources: ["pods", "nodes", "services", "events", "deployments", "replicasets", replicationcontrollers, "jobs", "cronjobs", "statefulsets", "daemonsets"]
+  - apiGroups: ["", "apps", "app.k8s.io", "batch", "networking.k8s.io"]
+    resources: ["pods", "nodes", "services", "events", "deployments", "namespaces", "replicasets", "replicationcontrollers", "jobs", "cronjobs", "statefulsets", "daemonsets", "persistentvolumes", "persistentvolumeclaims", "ingresses"]
     verbs: ["get", "watch", "list"]
+  - apiGroups: ["kafka.strimzi.io"]
+    resources: ["kafkas","kafkatopics"]
+    verbs: ["list"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices"]
+    verbs: ["list"]
 ```
 
 ### Executor

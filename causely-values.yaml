@@ -1,0 +1,84 @@
+scrapers:
+  istio:
+    enabled: true
+    prometheus:
+      endpoint: http://prometheus.istio-system.svc.cluster.local:9090
+
+  prometheus:
+    enabled: true
+    endpoint: http://prometheus-operated.monitoring.svc.cluster.local:9090
+    exporters:
+      chaosmania:
+        entities:
+          - entityType: ApplicationInstance
+            metrics:
+              - attribute: TransactionCount
+                query: "sum by (namespace, service, pod) (rate(chaosmania_processed_transactions_duration_count[1m]))"
+              - attribute: TransactionDuration
+                query: "sum by (namespace, service, pod) (rate(chaosmania_processed_transactions_duration_sum[1m]) / (rate(chaosmania_processed_transactions_duration_count[1m]) > 0 or (rate(chaosmania_processed_transactions_duration_count[1m]) + 1)))"
+              - attribute: DBQueryDuration
+                query: "sum by (namespace, service, pod) (rate(postgres_queries_sum[1m]) / (rate(postgres_queries_count[1m]) > 0 or (rate(postgres_queries_count[1m]) + 1)))"
+            attributes:
+              id:
+                label: [ "pod" ]
+            connections: # connections represent connection between entities based on the link Query
+              - entityType: DatabaseServerInstance
+                relation: LayeredOver
+              - entityType: CacheInstance
+                relation: LayeredOver
+
+  datadog:
+    enabled: false
+    org: Customer
+    api_key: YYY
+    app_key: ZZZ
+    monitor_mapping:
+      - entityType: ApplicationLoadBalancer
+        createIfMissing: true
+        attributes:
+          service_name:
+            label: ["hostname"]
+            isIdentifier: true
+        resources:
+          - monitorId: 123267804
+            attribute: RequestsTotal
+
+      - entityType: ApplicationInstance
+        createIfMissing: true
+        attributes:
+          service_name:
+            label: ["app", "dbinstanceidentifier"]
+            isIdentifier: true
+          namespace:
+            label: ["kube_namespace"]
+          cluster_name:
+            label: ["cluster_name"]
+        resources:
+          - attribute: DBConnectionUsage
+            monitorId: 117543973
+            symptom: DBConnectionsUtilization_High
+          - attribute: DBQueryDuration
+            monitorId: 117543822
+            symptom: DBQueryDuration_High
+        consumes:
+          - entityType: DatabaseServerInstance
+            relation: Underlying
+            attributes:
+              service_name:
+                label: ["dbinstanceidentifier"]
+
+      - entityType: DatabaseServerInstance
+        createIfMissing: true
+        attributes:
+          id:
+            label: ["host"]
+          service_name:
+            label: ["dbinstanceidentifier"]
+            isIdentifier: true
+        resources:
+          - monitorId: 116252750
+            attribute: DBConnectionUsage
+            symptom: DBConnectionsUtilization_High
+          - monitorId: 116252751
+            attribute: DBQueryDuration
+            symptom: DBQueryDuration_High
