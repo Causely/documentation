@@ -27,8 +27,23 @@ scrapers:
               - entityType: CacheInstance
                 relation: LayeredOver
 
+  aws:
+    enabled: true
+    secretName: aws-secret
+
+  gcp:
+    enabled: true
+    projects:
+      - id: "playground-377422"
+
+  azure:
+    enabled: true
+    subscriptions:
+      - secretName: spn-credentials
+        subscriptionId: 00000000-0000-0000-0000-000000000000
+
   datadog:
-    enabled: false
+    enabled: true
     org: Customer
     api_key: YYY
     app_key: ZZZ
