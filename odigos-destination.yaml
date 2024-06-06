@@ -1,0 +1,13 @@
+apiVersion: odigos.io/v1alpha1
+kind: Destination
+metadata:
+  name: odigos.io.dest.causely
+  namespace: odigos-system
+spec:
+  data:
+    CAUSELY_URL: http://mediator.causely:4317
+  destinationName: causely
+  signals:
+  - TRACES
+  - METRICS 
+  type: causely

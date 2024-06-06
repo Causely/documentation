@@ -1,0 +1,20 @@
+opentelemetry-collector:
+  config:
+    exporters:
+      otlp/causely:
+        endpoint: mediator.causely:4317
+        tls:
+          insecure: true
+          insecure_skip_verify: true
+    service:
+      pipelines:
+        traces/causely:
+          exporters:
+          - otlp/causely
+          processors:
+          - batch/traces
+          receivers:
+          - otlp
+          - datadog
+          - faro
+
