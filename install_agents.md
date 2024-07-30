@@ -147,6 +147,18 @@ scrapers:
 
 Please ensure that the Prometheus instance scrapes all your Istio sidecars to capture all the service-to-service communication metrics.
 
+### Istio - w/o Prometheus
+
+The Istio integration works by scraping the Istio relevant data directly from the istio sidecars.
+
+To enable Istio as a data source, please add the following section to your values.yaml file:
+
+```yaml
+scrapers:
+  istiosidecar:
+    enabled: true
+```
+
 ### Datadog
 
 To enable Datadog as a data source, please add the following section to your `values.yaml` file:
